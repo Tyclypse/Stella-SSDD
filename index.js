@@ -25,6 +25,7 @@ const ping = require("./interactions/ping");
 const review = require("./interactions/review");
 const implement = require("./interactions/implement");
 const changelog = require("./interactions/changelog");
+const source = require("./interactions/source");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
@@ -53,6 +54,7 @@ client.on("interactionCreate", async (interaction) => {
   await review(client, interaction);
   await implement(client, interaction);
   await changelog(client, interaction);
+  await source(client, interaction);
 
 });
 
