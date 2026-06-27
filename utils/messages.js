@@ -25,13 +25,28 @@ once those changes are made, feel free to submit it again!
 function implemented(message, approval, notes, reviewer) {
     return `🚀 **asset IMPLEMENTED!!**
 
-woohoo, ${message.member?.displayName ?? message.author.username}! your asset has officially been implemented!! 🎉
+woohoo, ${message.member?.displayName ?? message.author.username}! your asset has officially been implemented!!
 
 *feedback:*
 ${notes || "none!"}
 
 thank you for your hard work and contributions!
 -# implemented by ${reviewer}`;
+}
+
+function sourceAsset(message, approval, notes, reviewer) {
+    return `📁 **source asset ACCEPTED!!**
+
+yay, ${message.member?.displayName ?? message.author.username}!!! your work has been accepted into **${approval.game}**'s source library!
+
+this means it'll help create other assets during development instead of being implemented directly into the game.
+
+*feedback:*
+${notes || "none!"}
+
+thanks for helping bring the project to life!!
+
+-# classified as a source asset by ${reviewer}`;
 }
 
 function reviewLog(
@@ -64,10 +79,10 @@ ${message.url}
 -# originally approved by ${reviewer}`;
 }
 
-
 module.exports = {
     approved,
     needsImprovement,
     implemented,
+    sourceAsset,
     reviewLog,
 };
