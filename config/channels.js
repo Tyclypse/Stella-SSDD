@@ -1,0 +1,3 @@
+module.exports = {
+    REVIEW_LOG_CHANNEL: "1520270220533436576",
+};
