@@ -45,7 +45,6 @@ this means it'll help create other assets during development instead of being im
 ${notes || "none!"}
 
 thanks for helping bring the project to life!!
-
 -# classified as a source asset by ${reviewer}`;
 }
 
