@@ -10,7 +10,7 @@
 - Permission checks
 - Attachment detection
 
-built with:
+Built with:
 - Node.js
 - discord.js
  
