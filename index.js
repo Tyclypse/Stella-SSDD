@@ -30,12 +30,16 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
+const { getRandomStatus } = require("./utils/statuses");
+function updatePresence() {
+    client.user.setActivity(getRandomStatus(), {
+        type: ActivityType.Playing,
+    });
+}
+
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
  scheduleDailyEncouragement(client);
-  client.user.setActivity("✨ keeping starfloat afloat!", {
-    type: ActivityType.Playing,
-  });
 });
 
 client.on("interactionCreate", async (interaction) => {
