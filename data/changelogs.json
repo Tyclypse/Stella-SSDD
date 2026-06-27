@@ -1,8 +1,28 @@
 {
-  "SEEKING": {
-    "major": 0,
-    "minor": 0,
-    "patch": 0,
-    "history": []
-  }
+    "SEEKING": {
+        "major": 0,
+        "minor": 0,
+        "patch": 1,
+        "history": [
+            {
+                "version": "0.0.1",
+                "author": "Tyler",
+                "changes": "test",
+                "date": "2026-06-27T06:57:01.461Z"
+            },
+            {
+                "version": "0.0.2",
+                "author": "Tyler",
+                "changes": "test x2",
+                "date": "2026-06-27T07:02:50.669Z"
+            },
+            {
+                "version": "0.0.1",
+                "author": "Tyler",
+                "changes": "Reverted to v0.0.1",
+                "reason": "No reason provided.",
+                "date": "2026-06-27T07:03:13.374Z"
+            }
+        ]
+    }
 }

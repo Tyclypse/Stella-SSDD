@@ -6,18 +6,36 @@ const {
     SlashCommandBuilder,
     ContextMenuCommandBuilder,
     ApplicationCommandType,
+    
 } = require("discord.js");
 
 const commands = [
+
     new SlashCommandBuilder()
-        .setName("ping")
-        .setDescription("Checks if Stella is awake!")
+        .setName("changelog")
+        .setDescription("Manage game changelogs.")
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("commit")
+                .setDescription("Commit a new game version.")
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("revert")
+                .setDescription("Revert to a previous version.")
+        )
         .toJSON(),
 
     new ContextMenuCommandBuilder()
         .setName("Review")
         .setType(ApplicationCommandType.Message)
         .toJSON(),
+
+    new SlashCommandBuilder()
+        .setName("ping")
+        .setDescription("Checks if Stella is awake!")
+        .toJSON(),
+
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);

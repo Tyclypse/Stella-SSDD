@@ -25,6 +25,7 @@ const parseAttachments = require("./utils/attachmentParser");
 const ping = require("./interactions/ping");
 const review = require("./interactions/review");
 const implement = require("./interactions/implement");
+const changelog = require("./interactions/changelog");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
@@ -41,11 +42,10 @@ client.once("ready", () => {
 client.on("interactionCreate", async (interaction) => {
 
   await ping(interaction);
-
   await review(client, interaction);
-
   await implement(client, interaction);
-  
+  await changelog(client, interaction);
+
 });
 
 console.log(process.env.TOKEN ? "Token loaded" : "No token loaded");
