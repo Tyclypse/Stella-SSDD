@@ -32,7 +32,7 @@ const client = new Client({
 
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
-
+ scheduleDailyEncouragement(client);
   client.user.setActivity("✨ keeping starfloat afloat!", {
     type: ActivityType.Playing,
   });
@@ -41,6 +41,7 @@ client.once("ready", () => {
 client.on("interactionCreate", async (interaction) => {
 
   await ping(interaction);
+  
   await review(client, interaction);
   await implement(client, interaction);
   await changelog(client, interaction);
