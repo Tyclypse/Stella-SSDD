@@ -43,7 +43,7 @@ client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
  scheduleDailyEncouragement(client);
   updatePresence();
-    setInterval(updatePresence, 2 * 60 * 1000);
+    setInterval(updatePresence, 0.25 * 60 * 1000);
 });
 
 client.on("interactionCreate", async (interaction) => {
