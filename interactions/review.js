@@ -219,7 +219,15 @@ module.exports = async function review(client, interaction) {
 
             const row = new ActionRowBuilder()
                 .addComponents(implementButton);
+            
+            const sourceButton = new ButtonBuilder()
+    .setCustomId(`source_${approval.channelId}_${approval.messageId}`)
+    .setLabel("Mark as Source")
+    .setEmoji("📁")
+    .setStyle(ButtonStyle.Secondary);
 
+const row = new ActionRowBuilder()
+    .addComponents(implementButton, sourceButton);
          await logChannel.send({
     content: messages.reviewLog(
         message,
