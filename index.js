@@ -1,4 +1,3 @@
-console.log("HELLO");
 require("dotenv").config();
 
 const {

@@ -18,7 +18,7 @@ nice work, ${message.member?.displayName ?? message.author.username}! you're alm
 *feedback:*
 ${notes || "none!"}
 
-once those changes are made, feel free to submit it again!!!
+once those changes are made, feel free to submit it again!
 -# reviewer: ${reviewer}`;
 }
 
