@@ -15,7 +15,7 @@ const DAILY_ENCOURAGEMENTS = [
     "🎮 who's working on something cool today? i'd love to hear about it!!",
     "📦 today's mission: make at least ONE thing that didn't exist yesterday.",
     "🤖 i performed today's studio inspection. conclusion: you all are pretty cool.",
-    "🥀 i couldn't think of anything motivational today...",
+    "🥀 i couldn't think of anything motivational today... just do your best, all i ask!!!!",
     "👀 imagine if everyone here made just one small improvement today. we'd be unstoppable.",
     "💛 thank you all for helping make Starfloat Studios what it is. i'm really happy to be here with you guys!!!!"
 ];
