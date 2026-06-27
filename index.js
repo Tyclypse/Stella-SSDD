@@ -31,6 +31,8 @@ const client = new Client({
 });
 
 const { getRandomStatus } = require("./utils/statuses");
+const scheduleDailyEncouragement = require("./systems/dailyEncouragement");
+
 function updatePresence() {
     client.user.setActivity(getRandomStatus(), {
         type: ActivityType.Playing,
@@ -40,6 +42,8 @@ function updatePresence() {
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
  scheduleDailyEncouragement(client);
+  updatePresence();
+    setInterval(updatePresence, 15 * 60 * 1000);
 });
 
 client.on("interactionCreate", async (interaction) => {
