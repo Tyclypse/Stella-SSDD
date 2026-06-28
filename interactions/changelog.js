@@ -8,7 +8,7 @@ const {
 
 const { db } = require("../database/db");
 
-await client.channels.fetch(CHANGELOG_CHANNEL_ID);
+const CHANGELOG_CHANNEL_ID = "1520310354473783296";
 
 module.exports = async function changelog(client, interaction) {
 
