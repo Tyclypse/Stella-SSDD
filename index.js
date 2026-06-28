@@ -27,6 +27,11 @@ const implement = require("./interactions/implement");
 const changelog = require("./interactions/changelog");
 const source = require("./interactions/source");
 
+const STELLA_OVERRIDE = {
+    enabled: true,
+    channelId: "1520326152328183908",
+};
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
@@ -37,6 +42,18 @@ const scheduleDailyEncouragement = require("./systems/dailyEncouragement");
 function updatePresence() {
     client.user.setActivity(getRandomStatus(), {
         type: ActivityType.Playing,
+    });
+}
+
+if (STELLA_OVERRIDE.enabled) {
+    process.stdin.on("data", async (data) => {
+        const message = data.toString().trim();
+
+        if (!message) return;
+
+        const channel = await client.channels.fetch(STELLA_OVERRIDE.channelId);
+
+        await channel.send(message);
     });
 }
 
