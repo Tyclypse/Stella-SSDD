@@ -27,10 +27,6 @@ const implement = require("./interactions/implement");
 const changelog = require("./interactions/changelog");
 const source = require("./interactions/source");
 
-const STELLA_OVERRIDE = {
-    enabled: true,
-    channelId: "1520326152328183908",
-};
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
@@ -42,18 +38,6 @@ const scheduleDailyEncouragement = require("./systems/dailyEncouragement");
 function updatePresence() {
     client.user.setActivity(getRandomStatus(), {
         type: ActivityType.Playing,
-    });
-}
-
-if (STELLA_OVERRIDE.enabled) {
-    process.stdin.on("data", async (data) => {
-        const message = data.toString().trim();
-
-        if (!message) return;
-
-        const channel = await client.channels.fetch(STELLA_OVERRIDE.channelId);
-
-        await channel.send(message);
     });
 }
 
@@ -78,3 +62,34 @@ client.on("interactionCreate", async (interaction) => {
 console.log(process.env.TOKEN ? "Token loaded" : "No token loaded");
 
 client.login(process.env.TOKEN);
+
+const readline = require("readline");
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+const OVERRIDE_CHANNEL = "1512571548995813638";
+
+console.log("Stella Override Ready!");
+
+rl.on("line", async (line) => {
+
+    if (!line.trim()) return;
+
+    try {
+
+        const channel = await client.channels.fetch(OVERRIDE_CHANNEL);
+
+        await channel.send(line);
+
+        console.log("✓ Sent!");
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+});
