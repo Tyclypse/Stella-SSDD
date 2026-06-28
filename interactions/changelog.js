@@ -6,13 +6,9 @@ const {
     TextInputStyle,
 } = require("discord.js");
 
-const fs = require("fs");
-const path = require("path");
+const { db } = require("../database/db");
 
-const CHANGELOG_FILE = path.join(
-    __dirname,
-    "../data/changelogs.json"
-);
+const CHANGELOG_CHANNEL_ID = "1520310354473783296";
 
 module.exports = async function changelog(client, interaction) {
 
@@ -197,49 +193,60 @@ Removed Herobrine`)
             .map(line => `• ${line}`)
             .join("\n");
 
-        const data = JSON.parse(
-            fs.readFileSync(CHANGELOG_FILE, "utf8")
-        );
+      await db.query(`
+    INSERT INTO changelogs (game, major, minor, patch)
+    VALUES ($1, 0, 0, 0)
+    ON CONFLICT (game) DO NOTHING
+`, [game]);
 
-        const version = data[game];
+const result = await db.query(`
+    SELECT major, minor, patch
+    FROM changelogs
+    WHERE game = $1
+`, [game]);
 
-        switch (increment) {
+const version = result.rows[0];
 
-            case "major":
-                version.major++;
-                version.minor = 0;
-                version.patch = 0;
-                break;
+switch (increment) {
+    case "major":
+        version.major++;
+        version.minor = 0;
+        version.patch = 0;
+        break;
 
-            case "minor":
-                version.minor++;
-                version.patch = 0;
-                break;
+    case "minor":
+        version.minor++;
+        version.patch = 0;
+        break;
 
-            case "patch":
-                version.patch++;
-                break;
+    case "patch":
+        version.patch++;
+        break;
+}
 
-        }
+const versionString =
+    `${version.major}.${version.minor}.${version.patch}`;
 
-        const versionString =
-            `${version.major}.${version.minor}.${version.patch}`;
+await db.query(`
+    UPDATE changelogs
+    SET major = $1, minor = $2, patch = $3
+    WHERE game = $4
+`, [version.major, version.minor, version.patch, game]);
 
-        version.history.push({
-            version: versionString,
-            author: interaction.member.displayName,
-            changes,
-            date: new Date().toISOString(),
-        });
+await db.query(`
+    INSERT INTO changelog_history (game, version, author, changes)
+    VALUES ($1, $2, $3, $4)
+`, [
+    game,
+    versionString,
+    interaction.member.displayName,
+    changes,
+]);
 
-        fs.writeFileSync(
-            CHANGELOG_FILE,
-            JSON.stringify(data, null, 4)
-        );
+      const changelogChannel =
+    await client.channels.fetch(CHANGELOG_CHANNEL_ID);
 
-        const changelogChannel =
-            await client.channels.fetch("1520310354473783296");
-
+        
         await changelogChannel.send(
             `# ✨ new ${game} version committed!
 
