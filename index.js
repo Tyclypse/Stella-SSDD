@@ -59,9 +59,13 @@ client.on("interactionCreate", async (interaction) => {
 
 });
 
-console.log(process.env.TOKEN ? "Token loaded" : "No token loaded");
+const { initDatabase } = require("./database/db");
 
-client.login(process.env.TOKEN);
+initDatabase()
+    .then(() => client.login(process.env.TOKEN))
+    .catch(console.error);
+
+console.log(process.env.TOKEN ? "Token loaded" : "No token loaded");
 
 const readline = require("readline");
 
