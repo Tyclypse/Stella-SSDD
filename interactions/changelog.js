@@ -8,7 +8,7 @@ const {
 
 const { db } = require("../database/db");
 
-const CHANGELOG_CHANNEL_ID = "1520310354473783296";
+await client.channels.fetch(CHANGELOG_CHANNEL_ID);
 
 module.exports = async function changelog(client, interaction) {
 
@@ -266,52 +266,51 @@ ${formattedChanges}
         return;
     }
 
-    if (
-        interaction.isStringSelectMenu() &&
-        interaction.customId === "changelog_revert_game"
-    ) {
+   if (
+    interaction.isStringSelectMenu() &&
+    interaction.customId === "changelog_revert_game"
+) {
+    const game = interaction.values[0];
 
-        const game = interaction.values[0];
+    const result = await db.query(`
+        SELECT version, author
+        FROM changelog_history
+        WHERE game = $1
+        ORDER BY id DESC
+        LIMIT 25
+    `, [game]);
 
-        const data = JSON.parse(
-            fs.readFileSync(CHANGELOG_FILE, "utf8")
-        );
+    const history = result.rows;
 
-        const history = data[game].history;
-
-        if (!history.length) {
-
-            await interaction.reply({
-                content: "❌ hmmmm... there aren't any previous versions to revert to...",
-                ephemeral: true,
-            });
-
-            return;
-        }
-
-        const versionMenu = new StringSelectMenuBuilder()
-            .setCustomId(`changelog_revert_version_${game}`)
-            .setPlaceholder("Select a version...")
-            .addOptions(
-                history
-                    .slice()
-                    .reverse()
-                    .map(entry => ({
-                        label: `v${entry.version}`,
-                        value: entry.version,
-                        description: entry.author,
-                    }))
-            );
-
-        await interaction.update({
-            content: "⏪ **which version should i restore?**",
-            components: [
-                new ActionRowBuilder().addComponents(versionMenu),
-            ],
+    if (!history.length) {
+        await interaction.reply({
+            content: "❌ hmmmm... there aren't any previous versions to revert to...",
+            ephemeral: true,
         });
 
         return;
     }
+
+    const versionMenu = new StringSelectMenuBuilder()
+        .setCustomId(`changelog_revert_version_${game}`)
+        .setPlaceholder("Select a version...")
+        .addOptions(
+            history.map(entry => ({
+                label: `v${entry.version}`,
+                value: entry.version,
+                description: entry.author,
+            }))
+        );
+
+    await interaction.update({
+        content: "⏪ **which version should i restore?**",
+        components: [
+            new ActionRowBuilder().addComponents(versionMenu),
+        ],
+    });
+
+    return;
+}
 
     // ==========================
     // Revert Version Dropdown
@@ -363,33 +362,28 @@ ${formattedChanges}
         const reason =
             interaction.fields.getTextInputValue("reason") || "No reason provided.";
 
-        const data = JSON.parse(
-            fs.readFileSync(CHANGELOG_FILE, "utf8")
-        );
+       const [major, minor, patch] = version.split(".").map(Number);
 
-        const gameData = data[game];
+await db.query(`
+    INSERT INTO changelogs (game, major, minor, patch)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (game)
+    DO UPDATE SET major = $2, minor = $3, patch = $4
+`, [game, major, minor, patch]);
 
-        const [major, minor, patch] = version.split(".").map(Number);
-
-        gameData.major = major;
-        gameData.minor = minor;
-        gameData.patch = patch;
-
-        gameData.history.push({
-            version,
-            author: interaction.member.displayName,
-            changes: `Reverted to v${version}`,
-            reason,
-            date: new Date().toISOString(),
-        });
-
-        fs.writeFileSync(
-            CHANGELOG_FILE,
-            JSON.stringify(data, null, 4)
-        );
+await db.query(`
+    INSERT INTO changelog_history (game, version, author, changes, reason)
+    VALUES ($1, $2, $3, $4, $5)
+`, [
+    game,
+    version,
+    interaction.member.displayName,
+    `Reverted to v${version}`,
+    reason,
+]);
 
         const changelogChannel =
-            await client.channels.fetch("1520310354473783296");
+      await client.channels.fetch(CHANGELOG_CHANNEL_ID);
 
         await changelogChannel.send(
             `# ⚠️ ${game} game version reverted!
