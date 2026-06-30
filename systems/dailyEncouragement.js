@@ -1,9 +1,6 @@
-const cron = require("node-cron");
 const { getRandomEncouragement } = require("../utils/dailyEncouragements");
 
 const ENCOURAGEMENT_CHANNEL_ID = "1512571548995813638";
-const TIME_ZONE = "America/New_York";
-const CRON_SCHEDULE = "0 12 * * *";
 
 async function sendDailyEncouragement(client) {
     try {
@@ -21,18 +18,45 @@ async function sendDailyEncouragement(client) {
     }
 }
 
-function scheduleDailyEncouragement(client) {
-    cron.schedule(
-        CRON_SCHEDULE,
-        async () => {
-            await sendDailyEncouragement(client);
-        },
-        {
-            timezone: TIME_ZONE,
-        }
+let lastSentDate = null;
+
+function getEasternTimeParts() {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
+
+    const parts = Object.fromEntries(
+        formatter.formatToParts(new Date()).map(part => [part.type, part.value])
     );
 
-    console.log(`Daily encouragement scheduled for 12:00 PM ${TIME_ZONE}.`);
+    return {
+        dateKey: parts.year + "-" + parts.month + "-" + parts.day,
+        hour: Number(parts.hour),
+        minute: Number(parts.minute),
+    };
+}
+
+function scheduleDailyEncouragement(client) {
+    setInterval(async () => {
+        const now = getEasternTimeParts();
+
+        if (
+            now.hour === 12 &&
+            now.minute === 0 &&
+            lastSentDate !== now.dateKey
+        ) {
+            lastSentDate = now.dateKey;
+            await sendDailyEncouragement(client);
+        }
+    }, 60 * 1000);
+
+    console.log("Daily encouragement scheduled for 12:00 PM America/New_York.");
 }
 
 module.exports = scheduleDailyEncouragement;
