@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { Client, GatewayIntentBits } = require("discord.js");
+const { REST, Routes } = require("discord.js");
 
 const [, , channelId, ...messageParts] = process.argv;
 const message = messageParts.join(" ");
@@ -10,20 +10,20 @@ if (!channelId || !message) {
     process.exit(1);
 }
 
-const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
-});
+const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-client.once("ready", async () => {
+async function sendOverride() {
     try {
-        const channel = await client.channels.fetch(channelId);
-        await channel.send(message);
+        await rest.post(Routes.channelMessages(channelId), {
+            body: {
+                content: message,
+            },
+        });
+
         console.log("Sent as Stella!");
     } catch (error) {
         console.error(error);
-    } finally {
-        client.destroy();
     }
-});
+}
 
-client.login(process.env.TOKEN);
+sendOverride();
