@@ -6,11 +6,9 @@ const {
     SlashCommandBuilder,
     ContextMenuCommandBuilder,
     ApplicationCommandType,
-    
 } = require("discord.js");
 
 const commands = [
-
     new SlashCommandBuilder()
         .setName("changelog")
         .setDescription("Manage game changelogs.")
@@ -26,6 +24,21 @@ const commands = [
         )
         .toJSON(),
 
+    new SlashCommandBuilder()
+        .setName("devlog")
+        .setDescription("Manage development logs.")
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("commit")
+                .setDescription("Commit a new development build.")
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("revert")
+                .setDescription("Revert to a previous development build.")
+        )
+        .toJSON(),
+
     new ContextMenuCommandBuilder()
         .setName("Review")
         .setType(ApplicationCommandType.Message)
@@ -35,7 +48,6 @@ const commands = [
         .setName("ping")
         .setDescription("Checks if Stella is awake!")
         .toJSON(),
-
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
@@ -52,7 +64,7 @@ const GUILD_ID = "1512569608639353035";
             { body: commands }
         );
 
-        console.log("✅ Commands registered!");
+        console.log("Commands registered.");
     } catch (error) {
         console.error(error);
     }
