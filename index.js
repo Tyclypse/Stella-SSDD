@@ -51,7 +51,6 @@ client.once("ready", () => {
 client.on("interactionCreate", async (interaction) => {
 
   await ping(interaction);
-  
   await review(client, interaction);
   await implement(client, interaction);
   await changelog(client, interaction);
