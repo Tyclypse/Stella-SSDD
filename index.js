@@ -74,7 +74,7 @@ const rl = readline.createInterface({
     output: process.stdout,
 });
 
-const OVERRIDE_CHANNEL = "1520326152328183908";
+const OVERRIDE_CHANNEL = "1512571548995813638";
 
 console.log("Stella Override Ready!");
 
