@@ -10,23 +10,27 @@ const { db } = require("../database/db");
 
 const DEVLOG_CHANNEL_ID = "1520310354473783296";
 
-async function getCurrentMajor(game) {
+async function getCurrentRelease(game) {
     const result = await db.query(
-        `SELECT major FROM changelogs WHERE game = $1`,
+        `SELECT major, minor, patch FROM changelogs WHERE game = $1`,
         [game]
     );
 
-    return result.rows[0]?.major ?? 0;
+    return result.rows[0] ?? {
+        major: 0,
+        minor: 0,
+        patch: 0,
+    };
 }
 
 async function ensureDevlogExists(game) {
-    const major = await getCurrentMajor(game);
+    const release = await getCurrentRelease(game);
 
     await db.query(
         `INSERT INTO devlogs (game, major, build)
          VALUES ($1, $2, 0)
          ON CONFLICT (game) DO NOTHING`,
-        [game, major]
+        [game, release.major]
     );
 }
 
@@ -116,17 +120,17 @@ module.exports = async function devlog(client, interaction) {
 
         await ensureDevlogExists(game);
 
-        const currentMajor = await getCurrentMajor(game);
+        const release = await getCurrentRelease(game);
 
         const currentDevlog = await db.query(
             `SELECT major FROM devlogs WHERE game = $1`,
             [game]
         );
 
-        if (currentDevlog.rows[0].major !== currentMajor) {
+        if (currentDevlog.rows[0].major !== release.major) {
             await db.query(
                 `UPDATE devlogs SET major = $1, build = 0 WHERE game = $2`,
-                [currentMajor, game]
+                [release.major, game]
             );
         }
 
@@ -139,14 +143,14 @@ module.exports = async function devlog(client, interaction) {
         );
 
         const devlog = updated.rows[0];
-        const versionString = `v${devlog.major} development build #${devlog.build}`;
+        const versionString = `v${release.major}.${release.minor}.${release.patch} development build #${devlog.build}`;
 
         await db.query(
             `INSERT INTO devlog_history (game, major, build, version, author, changes)
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [
                 game,
-                devlog.major,
+                release.major,
                 devlog.build,
                 versionString,
                 interaction.member.displayName,
@@ -248,7 +252,7 @@ module.exports = async function devlog(client, interaction) {
 
         const reason = interaction.fields.getTextInputValue("reason") || "No reason provided.";
 
-        const match = version.match(/^v(\d+) development build #(\d+)$/);
+        const match = version.match(/^v(\d+)\.(\d+)\.(\d+) development build #(\d+)$/);
 
         if (!match) {
             await interaction.reply({
@@ -260,7 +264,7 @@ module.exports = async function devlog(client, interaction) {
         }
 
         const major = Number(match[1]);
-        const build = Number(match[2]);
+        const build = Number(match[4]);
 
         await db.query(
             `INSERT INTO devlogs (game, major, build)
