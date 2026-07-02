@@ -12,6 +12,17 @@ function parseVersion(version) {
     };
 }
 
+async function ensureTargetVersionTable() {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS target_versions (
+            game TEXT PRIMARY KEY,
+            target_major INTEGER NOT NULL DEFAULT 0,
+            target_minor INTEGER NOT NULL DEFAULT 0,
+            target_patch INTEGER NOT NULL DEFAULT 0
+        )
+    `);
+}
+
 module.exports = async function targetversion(client, interaction) {
     if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName !== "targetversion") return;
@@ -26,12 +37,14 @@ module.exports = async function targetversion(client, interaction) {
 
     if (!version) {
         await interaction.reply({
-            content: "❌ that version needs to look like `1.0.0` or `v1.0.0`.",
+            content: "that version needs to look like `1.0.0` or `v1.0.0`.",
             ephemeral: true,
         });
 
         return;
     }
+
+    await ensureTargetVersionTable();
 
     const existing = await db.query(
         `SELECT target_major, target_minor, target_patch
@@ -59,30 +72,30 @@ module.exports = async function targetversion(client, interaction) {
     );
 
     await db.query(
-        `INSERT INTO devlogs (game, major, minor, patch, build)
-         VALUES ($1, $2, $3, $4, 0)
+        `INSERT INTO devlogs (game, major, build)
+         VALUES ($1, $2, 0)
          ON CONFLICT (game) DO NOTHING`,
-        [game, version.major, version.minor, version.patch]
+        [game, version.major]
     );
 
     if (targetChanged) {
         await db.query(
             `UPDATE devlogs
-             SET major = $1, minor = $2, patch = $3, build = 0
-             WHERE game = $4`,
-            [version.major, version.minor, version.patch, game]
+             SET major = $1, build = 0
+             WHERE game = $2`,
+            [version.major, game]
         );
     } else {
         await db.query(
             `UPDATE devlogs
-             SET major = $1, minor = $2, patch = $3
-             WHERE game = $4`,
-            [version.major, version.minor, version.patch, game]
+             SET major = $1
+             WHERE game = $2`,
+            [version.major, game]
         );
     }
 
     await interaction.reply({
-        content: `🎯 target version for **${game}** is now **v${version.major}.${version.minor}.${version.patch}**.`,
+        content: `target version for **${game}** is now **v${version.major}.${version.minor}.${version.patch}**.`,
         ephemeral: true,
     });
 };
