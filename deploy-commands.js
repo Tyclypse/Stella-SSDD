@@ -39,6 +39,28 @@ const commands = [
         )
         .toJSON(),
 
+    new SlashCommandBuilder()
+        .setName("targetversion")
+        .setDescription("Manage target versions.")
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("set")
+                .setDescription("Set a target version.")
+                .addStringOption(option =>
+                    option
+                        .setName("game")
+                        .setDescription("Game name, such as SEEKING")
+                        .setRequired(true)
+                )
+                .addStringOption(option =>
+                    option
+                        .setName("version")
+                        .setDescription("Version, such as 1.0.0")
+                        .setRequired(true)
+                )
+        )
+        .toJSON(),
+
     new ContextMenuCommandBuilder()
         .setName("Review")
         .setType(ApplicationCommandType.Message)
