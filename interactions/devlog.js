@@ -76,11 +76,12 @@ module.exports = async function devlog(client, interaction) {
                     {
                         label: "SEEKING",
                         value: "SEEKING",
+                        emoji: "🥽",
                     },
                 ]);
 
             await interaction.reply({
-                content: "which game should i make a development log for?",
+                content: "🎮 **which game should i make a development log for?**",
                 components: [new ActionRowBuilder().addComponents(gameMenu)],
                 ephemeral: true,
             });
@@ -96,11 +97,12 @@ module.exports = async function devlog(client, interaction) {
                     {
                         label: "SEEKING",
                         value: "SEEKING",
+                        emoji: "🥽",
                     },
                 ]);
 
             await interaction.reply({
-                content: "which game development build would you like to revert?",
+                content: "⏪ **which game development build would you like to revert?**",
                 components: [new ActionRowBuilder().addComponents(gameMenu)],
                 ephemeral: true,
             });
@@ -187,11 +189,11 @@ module.exports = async function devlog(client, interaction) {
         const devlogChannel = await client.channels.fetch(DEVLOG_CHANNEL_ID);
 
         await devlogChannel.send(
-            `# new ${game} development log!\n\n${versionString}\n\n${formattedChanges}\n\n-# committed by ${interaction.member.displayName}`
+            `# 🛠️ new ${game} development log!\n\n${versionString}\n\n${formattedChanges}\n\n-# committed by ${interaction.member.displayName}`
         );
 
         await interaction.reply({
-            content: `committed **${versionString}** successfully!`,
+            content: `🛠️ committed **${versionString}** successfully!`,
             ephemeral: true,
         });
 
@@ -217,7 +219,7 @@ module.exports = async function devlog(client, interaction) {
 
         if (!history.length) {
             await interaction.reply({
-                content: "there aren't any previous development builds to revert to.",
+                content: "❌ hmmmm... there aren't any previous development builds to revert to...",
                 ephemeral: true,
             });
 
@@ -236,7 +238,7 @@ module.exports = async function devlog(client, interaction) {
             );
 
         await interaction.update({
-            content: "which development build should i restore?",
+            content: "⏪ **which development build should i restore?**",
             components: [new ActionRowBuilder().addComponents(versionMenu)],
         });
 
@@ -282,7 +284,7 @@ module.exports = async function devlog(client, interaction) {
 
         if (!match) {
             await interaction.reply({
-                content: "i couldn't read that development build version.",
+                content: "❌ i couldn't read that development build version.",
                 ephemeral: true,
             });
 
@@ -317,11 +319,11 @@ module.exports = async function devlog(client, interaction) {
         const devlogChannel = await client.channels.fetch(DEVLOG_CHANNEL_ID);
 
         await devlogChannel.send(
-            `# ${game} development build reverted!\n\n${version}\n\n**Reason:**\n${reason}\n\n-# reverted by ${interaction.member.displayName}`
+            `# ⚠️ ${game} development build reverted!\n\n${version}\n\n**Reason:**\n${reason}\n\n-# reverted by ${interaction.member.displayName}`
         );
 
         await interaction.reply({
-            content: `successfully reverted **${game}** to **${version}**!`,
+            content: `⏪ successfully reverted **${game}** to **${version}**!`,
             ephemeral: true,
         });
 
