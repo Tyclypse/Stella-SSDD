@@ -49,8 +49,14 @@ const commands = [
                 .addStringOption(option =>
                     option
                         .setName("game")
-                        .setDescription("Game name, such as SEEKING")
+                        .setDescription("Game")
                         .setRequired(true)
+                        .setChoices(
+                            {
+                                name: "SEEKING",
+                                value: "SEEKING",
+                            }
+                        )
                 )
                 .addStringOption(option =>
                     option
