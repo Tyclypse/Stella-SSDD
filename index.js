@@ -26,6 +26,7 @@ const review = require("./interactions/review");
 const implement = require("./interactions/implement");
 const changelog = require("./interactions/changelog");
 const devlog = require("./interactions/devlog");
+const targetversion = require("./interactions/targetversion");
 const source = require("./interactions/source");
 
 
@@ -56,6 +57,7 @@ client.on("interactionCreate", async (interaction) => {
   await implement(client, interaction);
   await changelog(client, interaction);
   await devlog(client, interaction);
+  await targetversion(client, interaction);
   await source(client, interaction);
 
 });
