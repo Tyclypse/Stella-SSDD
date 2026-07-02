@@ -10,13 +10,41 @@ const { db } = require("../database/db");
 
 const DEVLOG_CHANNEL_ID = "1520310354473783296";
 
-async function getCurrentRelease(game) {
-    const result = await db.query(
+async function ensureTargetVersionTable() {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS target_versions (
+            game TEXT PRIMARY KEY,
+            target_major INTEGER NOT NULL DEFAULT 0,
+            target_minor INTEGER NOT NULL DEFAULT 0,
+            target_patch INTEGER NOT NULL DEFAULT 0
+        )
+    `);
+}
+
+async function getTargetVersion(game) {
+    await ensureTargetVersionTable();
+
+    const target = await db.query(
+        `SELECT target_major, target_minor, target_patch
+         FROM target_versions
+         WHERE game = $1`,
+        [game]
+    );
+
+    if (target.rows[0]) {
+        return {
+            major: target.rows[0].target_major,
+            minor: target.rows[0].target_minor,
+            patch: target.rows[0].target_patch,
+        };
+    }
+
+    const release = await db.query(
         `SELECT major, minor, patch FROM changelogs WHERE game = $1`,
         [game]
     );
 
-    return result.rows[0] ?? {
+    return release.rows[0] ?? {
         major: 0,
         minor: 0,
         patch: 0,
@@ -24,13 +52,13 @@ async function getCurrentRelease(game) {
 }
 
 async function ensureDevlogExists(game) {
-    const release = await getCurrentRelease(game);
+    const target = await getTargetVersion(game);
 
     await db.query(
         `INSERT INTO devlogs (game, major, build)
          VALUES ($1, $2, 0)
          ON CONFLICT (game) DO NOTHING`,
-        [game, release.major]
+        [game, target.major]
     );
 }
 
@@ -48,12 +76,11 @@ module.exports = async function devlog(client, interaction) {
                     {
                         label: "SEEKING",
                         value: "SEEKING",
-                        emoji: "🥽",
                     },
                 ]);
 
             await interaction.reply({
-                content: "🎮 **which game should i make a development log for?**",
+                content: "which game should i make a development log for?",
                 components: [new ActionRowBuilder().addComponents(gameMenu)],
                 ephemeral: true,
             });
@@ -69,12 +96,11 @@ module.exports = async function devlog(client, interaction) {
                     {
                         label: "SEEKING",
                         value: "SEEKING",
-                        emoji: "🥽",
                     },
                 ]);
 
             await interaction.reply({
-                content: "⏪ **which game development build would you like to revert?**",
+                content: "which game development build would you like to revert?",
                 components: [new ActionRowBuilder().addComponents(gameMenu)],
                 ephemeral: true,
             });
@@ -120,17 +146,17 @@ module.exports = async function devlog(client, interaction) {
 
         await ensureDevlogExists(game);
 
-        const release = await getCurrentRelease(game);
+        const target = await getTargetVersion(game);
 
         const currentDevlog = await db.query(
             `SELECT major FROM devlogs WHERE game = $1`,
             [game]
         );
 
-        if (currentDevlog.rows[0].major !== release.major) {
+        if (currentDevlog.rows[0].major !== target.major) {
             await db.query(
                 `UPDATE devlogs SET major = $1, build = 0 WHERE game = $2`,
-                [release.major, game]
+                [target.major, game]
             );
         }
 
@@ -143,14 +169,14 @@ module.exports = async function devlog(client, interaction) {
         );
 
         const devlog = updated.rows[0];
-        const versionString = `v${release.major}.${release.minor}.${release.patch} development build #${devlog.build}`;
+        const versionString = `v${target.major}.${target.minor}.${target.patch} development build #${devlog.build}`;
 
         await db.query(
             `INSERT INTO devlog_history (game, major, build, version, author, changes)
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [
                 game,
-                release.major,
+                target.major,
                 devlog.build,
                 versionString,
                 interaction.member.displayName,
@@ -161,11 +187,11 @@ module.exports = async function devlog(client, interaction) {
         const devlogChannel = await client.channels.fetch(DEVLOG_CHANNEL_ID);
 
         await devlogChannel.send(
-            `# 🛠️ new ${game} development log!\n\n${versionString}\n\n${formattedChanges}\n\n-# committed by ${interaction.member.displayName}`
+            `# new ${game} development log!\n\n${versionString}\n\n${formattedChanges}\n\n-# committed by ${interaction.member.displayName}`
         );
 
         await interaction.reply({
-            content: `🛠️ committed **${versionString}** successfully!`,
+            content: `committed **${versionString}** successfully!`,
             ephemeral: true,
         });
 
@@ -191,7 +217,7 @@ module.exports = async function devlog(client, interaction) {
 
         if (!history.length) {
             await interaction.reply({
-                content: "❌ hmmmm... there aren't any previous development builds to revert to...",
+                content: "there aren't any previous development builds to revert to.",
                 ephemeral: true,
             });
 
@@ -210,7 +236,7 @@ module.exports = async function devlog(client, interaction) {
             );
 
         await interaction.update({
-            content: "⏪ **which development build should i restore?**",
+            content: "which development build should i restore?",
             components: [new ActionRowBuilder().addComponents(versionMenu)],
         });
 
@@ -256,7 +282,7 @@ module.exports = async function devlog(client, interaction) {
 
         if (!match) {
             await interaction.reply({
-                content: "❌ i couldn't read that development build version.",
+                content: "i couldn't read that development build version.",
                 ephemeral: true,
             });
 
@@ -291,11 +317,11 @@ module.exports = async function devlog(client, interaction) {
         const devlogChannel = await client.channels.fetch(DEVLOG_CHANNEL_ID);
 
         await devlogChannel.send(
-            `# ⚠️ ${game} development build reverted!\n\n${version}\n\n**Reason:**\n${reason}\n\n-# reverted by ${interaction.member.displayName}`
+            `# ${game} development build reverted!\n\n${version}\n\n**Reason:**\n${reason}\n\n-# reverted by ${interaction.member.displayName}`
         );
 
         await interaction.reply({
-            content: `⏪ successfully reverted **${game}** to **${version}**!`,
+            content: `successfully reverted **${game}** to **${version}**!`,
             ephemeral: true,
         });
 
