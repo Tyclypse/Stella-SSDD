@@ -24,15 +24,6 @@ module.exports = async function implement(client, interaction) {
         const originalMessage = await channel.messages.fetch(messageId);
 
         const notes = interaction.fields.getTextInputValue("feedback");
-
-        await originalMessage.reply(
-            messages.implemented(
-                originalMessage,
-                notes,
-                interaction.member.displayName
-            )
-        );
-
         const oldContent = interaction.message.content;
 
         const creator =
@@ -50,6 +41,15 @@ module.exports = async function implement(client, interaction) {
 
         const approver =
             oldContent.match(/originally approved by (.+)/)?.[1] ?? "Unknown";
+
+        await originalMessage.reply(
+            messages.implemented(
+                originalMessage,
+                { game },
+                notes,
+                interaction.member.displayName
+            )
+        );
 
         await interaction.update({
             content:
